@@ -11,7 +11,7 @@ conda env create --file environment.yml
 # ILI XTF Files
 ## Issues
 
-- GR and SGdo not have AmpelCodes in ILI files.
+- GR and SG do not have AmpelCodes in ILI files.
 
 - AG, BE, SO and TI do not have field _IDLaenge_.
 
