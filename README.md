@@ -98,3 +98,31 @@ Ampelcode GW: [169.27870000000001, 2.9284, 4.008]
 ___________________________________________________
 ````
 
+# XLSX Files
+
+Changelog for values in column _KBfrei_ (default: True/False)
+- FR: TRUE/FALSE to True/False
+- GE: TRUE/FALSE to True/False
+- JU: TRUE/FALSE to True/False: header differs
+- NE: N to False
+- VD: no changes
+- VS: no changes: header differs
+- BS: nein to False
+- NW: ja/nein to True/False
+- OW: ja/nein to True/False
+- SH: no changes
+- SZ: ja/nein to True/False
+- UR: false to False: header differs
+- ZG: nein to False
+- ZH: false to False: header differs
+
+Changelog for values in Ampelwerte:
+- GE: emptied <nul> and <Nul> values
+
+Changelog vor values in column _IDLaenge_
+- OW: multiplied column by value 1000 to get km
+- UR: column IDLaenge is missing
+
+Structure changelog
+
+
