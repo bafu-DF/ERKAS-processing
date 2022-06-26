@@ -1,0 +1,10 @@
+name: erkas-processing
+channels:
+  - conda-forge
+dependencies:
+  # specify python version
+  - python=3.10.5
+  # Additional packages
+  - numpy
+  - pandas
+  - geopandas
