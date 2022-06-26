@@ -117,7 +117,7 @@ Changelog for values in column _KBfrei_ (default: True/False)
 - ZH: false to False: header differs
 
 Changelog for values in column _Ampelwerte_:
-- GE: emptied <nul> and <Nul> values
+- GE: emptied nul and Nul values
 
 Changelog vor values in column _IDLaenge_
 - OW: multiplied column by value 1000 to get km
