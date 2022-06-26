@@ -100,7 +100,7 @@ ___________________________________________________
 
 # XLSX Files
 
-Changelog for values in column _KBfrei_ (default: True/False)
+Changelog for values in column _KBfrei_ (default: True/False):
 - FR: TRUE/FALSE to True/False
 - GE: TRUE/FALSE to True/False
 - JU: TRUE/FALSE to True/False: header differs
@@ -116,13 +116,13 @@ Changelog for values in column _KBfrei_ (default: True/False)
 - ZG: nein to False
 - ZH: false to False: header differs
 
-Changelog for values in Ampelwerte:
+Changelog for values in column _Ampelwerte_:
 - GE: emptied <nul> and <Nul> values
 
-Changelog vor values in column _IDLaenge_
+Changelog vor values in column _IDLaenge_:
 - OW: multiplied column by value 1000 to get km
 - UR: column IDLaenge is missing
 
-Structure changelog
+Structural changelog:
 
 
