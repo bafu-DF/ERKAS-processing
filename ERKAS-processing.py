@@ -1,5 +1,5 @@
-# ERKAS Excel tpo GPKG export
-# DF, 2022-03-29. Contact: florian.denzinger@bafu.admin.ch
+# ERKAS STATISTICS PROCESSING
+# DF, 2022-06-26
 
 import os
 import warnings
@@ -66,7 +66,7 @@ def unnest_list(filter_list):
     return(unnested)
 
 
-def calculate_statistics_from_ili_gpkg(gpkg_dir_conv, excel_export_path):
+def calculate_statistics_from_ili_gpkg(gpkg_dir, excel_export_path):
     """Calculates statistics for ILI converted GPKG file (compatible with ERKAS Strassen >V2_0)
 
     Args:
@@ -76,7 +76,7 @@ def calculate_statistics_from_ili_gpkg(gpkg_dir_conv, excel_export_path):
     import geopandas as gpd
     import pandas as pd
 
-    gpkg_dir = gpkg_dir_conv
+    workingdir = os.getcwd()
     gpkg_files = list_file_paths(gpkg_dir, '*.gpkg')
 
     df_results = pd.DataFrame()
@@ -174,16 +174,21 @@ def calculate_statistics_from_ili_gpkg(gpkg_dir_conv, excel_export_path):
         print("___________________________________________________")
 
     df_results
-    if not os.path.exists(workingdir + 'Data/RESULTS/'):
-        os.makedirs(os.path.join(workingdir + 'Data/RESULTS/'))
+    if not os.path.exists(os.path.join(workingdir, 'Data', 'RESULTS')):
+        os.makedirs(os.path.join(workingdir, 'Data', 'RESULTS'))
     df_results.to_excel(excel_export_path, index=False)
 
 
-warnings.filterwarnings("ignore")
+def main():
+    warnings.filterwarnings("ignore")
 
-# execute the script
-workingdir = os.getcwd()
+    # execute the script
 
-# calculate the statistics from ILI files (only compatible with model version >2_0)
-gpkg_dir = os.path.join(workingdir, '/Data/ILI_GPKG_CONVERT/')
-calculate_statistics_from_ili_gpkg(gpkg_dir, 'ILI_GPKG_STATISTICS.xlsx')
+    # calculate the statistics from ILI files (only compatible with model version >2_0)
+    gpkg_dir = r'Data/ILI_GPKG_CONVERT/'
+    calculate_statistics_from_ili_gpkg(
+        gpkg_dir, excel_export_path=r'Data/RESULTS/ILI_GPKG_STATISTICS.xlsx')
+
+
+if __name__ == main():
+    main()
