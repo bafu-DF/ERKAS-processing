@@ -124,5 +124,14 @@ Changelog vor values in column _IDLaenge_
 - UR: column IDLaenge is missing
 
 Structural changelog
+- JU: adjusted header to french header template and added empty field _ASKLSMineraloel_
+- VS: adjusted header to french header template
+- BL: deleted comment at the end of the document
+- NW: deleted comment at the end of the document, deleted Aussschlusskriterien gemäss Screening-Methodik EBP (columns AM ff.)
+- OW: deleted comment at the end of the document, deleted Aussschlusskriterien gemäss Screening-Methodik EBP (columns AM ff.)
+- SZ: deleted field _DTV_ (Analyse EBP is kept) and _DTV Faktor_
+- UR: adjusted header to german header template
+- ZH: adjusted header to german header template
+
 
 
