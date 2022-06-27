@@ -107,12 +107,13 @@ def calculate_statistics_from_ili_gpkg(gpkg_dir, excel_export_path):
         gdf_subset['Inhaber'] = canton_name_short
         print(f"Columns of subset: {len(gdf_subset.columns)}")
         if len(gdf_subset.columns) != 7:
+            print("Will not be analysed as used file has a geodatamodel with version <2_0 (Hint: check if field IDLaenge exists in dataset")
             print("___________________________________________________")
             continue
-        if not os.path.exists(workingdir + '/Data/ILI_GPKG_EXPORT/'):
-            os.makedirs(os.path.join(workingdir + '/Data/ILI_GPKG_EXPORT/'))
+        if not os.path.exists(workingdir + '/Data/ILI_GPKG_EXPORT_SUBSET/'):
+            os.makedirs(os.path.join(workingdir + '/Data/ILI_GPKG_EXPORT_SUBSET/'))
         gdf_subset.to_file(os.path.join(
-            workingdir, 'Data/ILI_GPKG_EXPORT/'+gpkg_file.stem+'.gpkg'), driver='GPKG')
+            workingdir, 'Data/ILI_GPKG_EXPORT_SUBSET/'+gpkg_file.stem+'.gpkg'), driver='GPKG')
 
         # calculate total of kilometer Durchgangsstrasse
         gdf_subset.IDLaenge = pd.to_numeric(gdf_subset.IDLaenge)
@@ -121,12 +122,13 @@ def calculate_statistics_from_ili_gpkg(gpkg_dir, excel_export_path):
         # calculate total KB befreit
         kbfrei_grouped = gdf_subset.groupby(
             kbfrei)[idlaenge].sum().reset_index()
+        print(kbfrei_grouped)
         kb_befreit = kbfrei_grouped[kbfrei_grouped[''.join(kbfrei)] == 'true']
         kbfrei_grouped[kbfrei_grouped[''.join(kbfrei)] == 'true']
         if kb_befreit.empty:
             kb_befreit_calc = 0
         else:
-            kb_befreit_calc = kb_befreit.values()
+            kb_befreit_calc = kb_befreit[idlaenge].values[0]/1000
         print(f"KB befreit: {kb_befreit_calc}")
         # calculate Ampelcodes
         ampelcodepers_grouped = gdf_subset.groupby(
@@ -179,6 +181,132 @@ def calculate_statistics_from_ili_gpkg(gpkg_dir, excel_export_path):
     df_results.to_excel(excel_export_path, index=False)
 
 
+
+
+def calculate_statistics_from_xlsx_file(xlsx_dir, excel_export_path):
+    """Calculates statistics for ERKAS Excel files (compatible with ERKAS Strassen >V2_0)
+
+    Args:
+        xlsx_dir (string): Path to the folder location of the Excel files (need to have a compatible header)
+        excel_export_path (string): Path where the excel file containing the statistics is saved to
+    """
+
+    import pandas as pd
+
+    workingdir = os.getcwd()
+    xlsx_files = list_file_paths(xlsx_dir, "*.xlsx")
+    df_results = pd.DataFrame()
+
+    for xlsx_file in xlsx_files:
+        print(f"Processing: {xlsx_file}")
+        df = pd.read_excel(xlsx_file, skiprows =2)
+        header = df.iloc[0]
+        df.columns = header
+        df = df.drop(df.index[[0, 1, 2]])
+        df.reset_index(drop=True, inplace=True)
+        df = df.drop(df.columns[[0]], axis=1)
+
+        # create gdf from excel data
+        gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.loc[:, 'Ort_E-Coord'], df.loc[:, 'Ort_N-Coord']))
+        gdf = gdf.set_crs('epsg:2056')
+        print(f"Number of points: {len(gdf.length)}")
+        print(f"Coordinate system: {gdf.crs}")
+        print(f"Number of columns (intial dataset): {len(gdf.columns)}")
+
+        if not os.path.exists(workingdir + '/Data/XLSX_GPKG_EXPORT_ALL/'):
+            os.makedirs(os.path.join(workingdir + '/Data/XLSX_GPKG_EXPORT_ALL/'))
+        #gdf.to_file(os.path.join(workingdir, 'Data/XLSX_GPKG_EXPORT_ALL/'+xlsx_file.stem+'.gpkg'), driver='GPKG')
+
+        filter_list = ['Inhaber', 'IDLaenge', 'KBfrei', 'AmpelCodePers', 'AmpelCodeOFG', 'AmpelCodeGW', 'geometry']
+        gdf_subset = gdf[filter_list]
+        print(f"Columns of subset: {len(gdf_subset.columns)}")
+        if len(gdf_subset.columns) != 7:
+            print(
+                "File will not be analysed as used file has a geodatamodel with version < V2_0 (Hint: check if field IDLaenge exists in dataset")
+            print("___________________________________________________")
+            continue
+        if not os.path.exists(workingdir + '/Data/XLSX_GPKG_EXPORT_SUBSET/'):
+            os.makedirs(os.path.join(workingdir + '/Data/XLSX_GPKG_EXPORT_SUBSET/'))
+        gdf_subset.to_file(os.path.join(workingdir, 'Data/XLSX_GPKG_EXPORT_SUBSET/' + xlsx_file.stem + '.gpkg'),
+                           driver='GPKG')
+
+        # calculate total of kilometer Durchgangsstrasse
+        total = gdf_subset.IDLaenge.sum() / 1000
+        print(f"Total Anzahl Kilometer Durchgangsstrasse: {total}")
+        # calculate total KB befreit
+        kbfrei_grouped = gdf_subset.groupby('KBfrei')['IDLaenge'].sum().reset_index()
+        print(kbfrei_grouped)
+        kb_befreit = kbfrei_grouped[kbfrei_grouped['KBfrei'] == 'True']
+        print(len(kb_befreit))
+        if kb_befreit.empty:
+            kb_befreit_calc = 0
+        else:
+            kb_befreit_calc = kb_befreit.IDLaenge.values[0]/1000
+        print(f"KB befreit: {kb_befreit_calc}")
+
+        # calculate Ampelcodes
+        ampelcodepers_grouped = gdf_subset.groupby(['AmpelCodePers'])['IDLaenge'].sum().reset_index()
+        ampelcodepers_calc = ampelcodepers_grouped['IDLaenge'].values / 1000
+        ampelcodepers_calc_classes = ampelcodepers_grouped['AmpelCodePers'].astype(int).values
+        print(f"Ampelcode Pers Classes: {ampelcodepers_calc_classes}")
+        print(f"Ampelcode Pers: {ampelcodepers_calc}")
+        ampelcodeofg_grouped = gdf_subset.groupby(['AmpelCodeOFG'])['IDLaenge'].sum().reset_index()
+        ampelcodeofg_calc = ampelcodeofg_grouped['IDLaenge'].values / 1000
+        ampelcodeofg_calc_classes = ampelcodeofg_grouped['AmpelCodeOFG'].astype(int).values
+        print(f"Ampelcode OFG Classes: {ampelcodeofg_calc_classes}")
+        print(f"Ampelcode OFG: {ampelcodeofg_calc}")
+        ampelcodegw_grouped = gdf_subset.groupby(['AmpelCodeGW'])['IDLaenge'].sum().reset_index()
+        ampelcodegw_calc = ampelcodegw_grouped['IDLaenge'].values / 1000
+        ampelcodegw_calc_classes = ampelcodegw_grouped['AmpelCodeGW'].astype(int).values
+        print(f"Ampelcode GW Classes: {ampelcodegw_calc_classes}")
+        print(f"Ampelcode GW: {ampelcodegw_calc}")
+
+        ampelcodepers_dict = {ampelcodepers_calc_classes[i]: ampelcodepers_calc[i] for i in range(len(ampelcodepers_calc_classes))}
+        ampelcodepers_dict = {f"AmpelcodePers{key}": val for key, val in ampelcodepers_dict.items()}
+        ampelcodeofg_dict = {ampelcodeofg_calc_classes[i]: ampelcodeofg_calc[i] for i in range(
+            len(ampelcodeofg_calc_classes))}
+        ampelcodeofg_dict = {
+            f"AmpelcodeOFG{key}": val for key, val in ampelcodeofg_dict.items()}
+        ampelcodegw_dict = {ampelcodegw_calc_classes[i]: ampelcodegw_calc[i] for i in range(
+            len(ampelcodegw_calc_classes))}
+        ampelcodegw_dict = {f"AmpelcodeGW{key}": val for key,
+                                                         val in ampelcodegw_dict.items()}
+
+        canton_name_short = gdf_subset['Inhaber'].values[0]
+
+        df = pd.concat([pd.DataFrame([canton_name_short], columns=['Inhaber']), pd.DataFrame([total], columns=[
+            'total_km_durchgangsstrasse']), pd.DataFrame([kb_befreit_calc], columns=['kb_befreit'])], axis=1)
+        df = pd.concat([df, pd.DataFrame([ampelcodepers_dict])], axis=1)
+        df = pd.concat([df, pd.DataFrame([ampelcodeofg_dict])], axis=1)
+        df = pd.concat([df, pd.DataFrame([ampelcodegw_dict])], axis=1)
+        df_results = pd.concat([df_results, df], axis=0)
+        print("___________________________________________________")
+
+    if not os.path.exists(os.path.join(workingdir, 'Data', 'RESULTS')):
+        os.makedirs(os.path.join(workingdir, 'Data', 'RESULTS'))
+    df_results.to_excel(excel_export_path, index=False)
+
+def combine_results_xlsx(results_dir, excel_export_path):
+    """Combine excel files in a directory into one
+
+    Args:
+        results_dir (string): Path to the folder location of the Excel files
+        excel_export_path (string): Path where the excel file containing the statistics is saved to
+    """
+    import pandas as pd
+
+    results_files = list_file_paths(results_dir, "*.xlsx")
+    excl_list = []
+    for file in results_files:
+        excl_list.append(pd.read_excel(file))
+    excl_merged = pd.DataFrame()
+    for excl_file in excl_list:
+        # appends the data into the excl_merged
+        # dataframe.
+        excl_merged = excl_merged.append(excl_file, ignore_index=True)
+    excl_merged.to_excel(excel_export_path, index=False)
+
+
 def main():
     warnings.filterwarnings("ignore")
 
@@ -186,9 +314,14 @@ def main():
 
     # calculate the statistics from ILI files (only compatible with model version >2_0)
     gpkg_dir = r'Data/ILI_GPKG_CONVERT/'
-    calculate_statistics_from_ili_gpkg(
-        gpkg_dir, excel_export_path=r'Data/RESULTS/ILI_GPKG_STATISTICS.xlsx')
+    calculate_statistics_from_ili_gpkg(gpkg_dir, excel_export_path=r'Data/RESULTS/ILI_GPKG_STATISTICS.xlsx')
 
+    xlsx_dir = r'Data/XLSX_CORRECTED/'
+    calculate_statistics_from_xlsx_file(xlsx_dir, excel_export_path=r'Data/RESULTS/XLSX_GPKG_STATISTICS.xlsx')
+
+    # combine two Excel files into one
+    results_dir = r'Data/RESULTS'
+    combine_results_xlsx(results_dir, excel_export_path='Data/RESULTS/Results.xlsx')
 
 if __name__ == main():
     main()
