@@ -135,13 +135,19 @@ def calculate_statistics_from_ili_gpkg(gpkg_dir, excel_export_path):
                 "IDLaenge exists in dataset")
             print("___________________________________________________")
             continue
+
+        gdf_export_columns = ['Kanton', 'Format', 'Berechnungsintervall', 'IDLaenge', 'KBfrei', 'AmpelCodePers',
+                              'AmpelCodeOFG', 'AmpelCodeGW', 'geometry'
+                              ]
+        gdf_export = gdf_subset
+        gdf_export = gdf_export.set_axis(gdf_export_columns, axis=1)
         if not os.path.exists(workingdir + '/Data/ILI_GPKG_EXPORT_SUBSET/'):
             os.makedirs(os.path.join(workingdir + '/Data/ILI_GPKG_EXPORT_SUBSET/'))
-        gdf_subset.to_file(os.path.join(
+        gdf_export.to_file(os.path.join(
             workingdir, 'Data/ILI_GPKG_EXPORT_SUBSET/' + gpkg_file.stem + '.gpkg'), driver='GPKG')
         if not os.path.exists(workingdir + '/Data/RESULTS/GPKG_EXPORT_SUBSET/'):
             os.makedirs(os.path.join(workingdir + '/Data/RESULTS/GPKG_EXPORT_SUBSET/'))
-        gdf_subset.to_file(os.path.join(
+        gdf_export.to_file(os.path.join(
             workingdir, 'Data/RESULTS/GPKG_EXPORT_SUBSET/' + gpkg_file.stem + '.gpkg'), driver='GPKG')
 
         # calculate total of kilometer Durchgangsstrasse
