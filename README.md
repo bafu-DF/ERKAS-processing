@@ -14,11 +14,12 @@ _Verkehrsaufkommen_, _Vollzug_ and _Ergebnis_. The resulting layer was exported 
 ## Open issues
 - GR and SG do not have AmpelCodes in ILI files. Exported to Excel and sent to CI for clarification.
 
+
 ## Changelog for ILI GPKG files:
 The following changes were performed on ILI GPKG files.
 - AG: Added field _IDLaenge_ with a length of 10 m in QGIS.
 - BE: Added field _IDLaenge_ with a length of 10 m in QGIS.
-- GR: Added field _IDLaenge_ with a length of 100 m in QGI.
+- GR: Added field _IDLaenge_ with a length of 100 m in QGIS.
 - SG: Added field _IDLaenge_ with a length of 100 m in QGIS.
 - SO: Added field _IDLaenge_ with a length of 10 m in QGIS.
 - TI: Added field _IDLaenge_ with a length of 10 m in QGIS.
@@ -27,8 +28,7 @@ The following changes were performed on ILI GPKG files.
 # XLSX Files
 
 ## Open issues
-- UR: column IDLaenge is missing, variable length calculated in QGIS, 3 segment lengths for 4 points, how to allocate?
-Asked Cl for clarification.
+- UR: column IDLaenge is not included in the file, quick fix: measured segment length in QGIS and added three resulting values of 803.047 m, 697.106 m and 594.919 m to the xlsx file. Last point was set to 0 m.
   
 ## Changelog for values in column _KBfrei_ 
 The following changes were performed on XLSX files in the column _KBfrei_ in Microsoft Excel:
@@ -53,6 +53,13 @@ The following changes were performed on XLSX files in the column _Ampelwerte_ in
 ## Changelog vor values in column _IDLaenge_
 The following changes were performed on XLSX files in the column _IDLaenge_ in Microsoft Excel:
 - OW: multiplied column by value 1000 to get km
+
+## Changelog for values in coordinates:
+- GE: swapped easting and northing coordinates
+- FR: swapped easting and northing coordinates 
+- SZ: swapped easting and northing coordinates 
+- VD: swapped easting and northing coordinates
+
 
 ## Structural changelog
 The following structural changes were made directly in the XLSX files:
